@@ -60,7 +60,7 @@ spec:
       template:
         spec:
           containers:
-          - image: registry.aliyuncs.com/tensorflow-samples/tf-mnist-distributed:cpu                      
+          - image: registry.aliyuncs.com/tensorflow-samples/tf-mnist-distributed:cpu                    
             name: tensorflow
             imagePullPolicy: IfNotPresent
             command: ["python", "/app/main.py"]
