@@ -73,7 +73,7 @@ spec:
             volumeMounts:
               - name: kubeflow-dist-mnist
                 mountPath: "/training"
-          volumes:
+          volumes: 
             - name: kubeflow-dist-mnist
               persistentVolumeClaim:
                 claimName: kubeflow-dist-mnist
