@@ -1,0 +1,80 @@
+apiVersion: kubeflow.org/v1beta1
+kind: TFJob
+metadata:
+  name: mnist-simple-gpu-dist
+  namespace: kubeflow
+spec:
+  tfReplicaSpecs:
+    Master:
+      replicas: 1
+      template:
+        spec:
+          containers:
+            - image: registry.aliyuncs.com/tensorflow-samples/tf-mnist-distributed:gpu
+              name: tensorflow
+              imagePullPolicy: IfNotPresent
+              env:
+              - name: TEST_TMPDIR
+                value: /training
+              command: ["python", "/app/main.py"]
+              args: 
+                - --max_steps=3000
+              resources:
+                limits:
+                  nvidia.com/gpu: 1
+              volumeMounts:
+              - name: kubeflow-dist-mnist
+                mountPath: "/training"
+          volumes:
+            - name: kubeflow-dist-mnist
+              persistentVolumeClaim:
+                claimName: kubeflow-dist-mnist
+          restartPolicy: OnFailure
+    Worker:
+      replicas: 1
+      template:
+        spec:
+          containers:
+          - image: registry.aliyuncs.com/tensorflow-samples/tf-mnist-distributed:gpu                        
+            name: tensorflow
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: TEST_TMPDIR
+              value: /training
+            command: ["python", "/app/main.py"]
+            args: 
+              - --max_steps=3000
+            resources:
+              limits:
+                nvidia.com/gpu: 1
+            volumeMounts:
+              - name: kubeflow-dist-mnist
+                mountPath: "/training"
+          volumes:
+            - name: kubeflow-dist-mnist
+              persistentVolumeClaim:
+                claimName: kubeflow-dist-mnist
+          restartPolicy: OnFailure
+    PS:
+      replicas: 1
+      template:
+        spec:
+          containers:
+          - image: registry.aliyuncs.com/tensorflow-samples/tf-mnist-distributed:cpu                      
+            name: tensorflow
+            imagePullPolicy: IfNotPresent
+            command: ["python", "/app/main.py"]
+            args: 
+              - --max_steps=3000
+            env:
+            - name: TEST_TMPDIR
+              value: /training
+            imagePullPolicy: Always
+            volumeMounts:
+              - name: kubeflow-dist-mnist
+                mountPath: "/training"
+          volumes:
+            - name: kubeflow-dist-mnist
+              persistentVolumeClaim:
+                claimName: kubeflow-dist-mnist
+          restartPolicy: OnFailure
